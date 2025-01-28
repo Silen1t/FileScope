@@ -1,0 +1,232 @@
+import { Button, VerticalBox, HorizontalBox, LineEdit, ComboBox, CheckBox, TabWidget, TextEdit, GridBox } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    
+  // Window Properties
+  title: "FileScope";
+    icon: @image-url("assets/images/FileScopeIcon.png");
+    max-height: 720px;
+    min-height: 500px;
+    max-width: 635px;
+    min-width: 610px;
+    full-screen: false;
+    always-on-top: false;
+    background: #1e1f22;
+
+  // Main Callbacks
+  callback ButtonSelectRootClicked();
+    callback ButtonSelectOutputClicked();
+    callback ButtonSearchClicked(string, string);
+    
+    // Wating Screen Callbacks
+    callback ShowWatingScreen(bool);
+    callback UpdateWatingText(string);
+    callback ExitWatingScreen();
+
+
+  // Main Properties
+  in-out property <string> root-path;
+    in-out property <string> output-path;
+    out property <bool> can-search-videos: false;
+    out property <bool> can-search-images: false;
+    out property <bool> can-search-compressed-files: false;
+    out property <bool> can-search-sounds: false;
+
+    // Wating Screen Properties
+    out property <string> message;
+    out property <bool> show-wating-screen: false;
+    in-out property <bool> can-exit-wating-screen: false;
+
+    VerticalLayout {
+        padding: 50px;
+        alignment: center;
+        spacing: 25px;
+
+        Text {
+            text: "FileScope";
+            font-size: 40px;
+            font-weight: 800;
+            horizontal-alignment: center;
+        }
+
+      // Select Root Box
+      HorizontalBox {
+            alignment: center;
+            spacing: 25px;
+            Button {
+                width: 150px;
+                primary: true;
+                text: "Select Root Path";
+                clicked => {
+                    root.ButtonSelectRootClicked();
+                }
+            }
+
+            LineEdit {
+                width: 200px;
+                font-size: 18px;
+                read-only: true;
+                text: root-path;
+                horizontal-alignment: center;
+            }
+        }
+
+      // Select Output Path
+      HorizontalBox {
+            alignment: center;
+            spacing: 25px;
+            Button {
+                width: 150px;
+                primary: true;
+                text: "Select Output Path";
+                clicked => {
+                    root.ButtonSelectOutputClicked();
+                }
+            }
+
+            LineEdit {
+                width: 200px;
+                font-size: 18px;
+                read-only: true;
+                text: root.output-path;
+                horizontal-alignment: center;
+            }
+        }
+
+        GridLayout {
+            spacing: 50px;
+            Row {
+                HorizontalBox {
+                    alignment: center;
+                    spacing: 25px;
+                    Text {
+                        text: "Images";
+                        font-size: 18px;
+                        horizontal-alignment: center;
+                    }
+
+                    CheckBox {
+                        toggled => {
+                            root.can-search-images = self.checked;
+                        }
+                    }
+                }
+
+                HorizontalBox {
+                    alignment: center;
+                    spacing: 25px;
+                    Text {
+                        text: "Videos";
+                        font-size: 18px;
+                        horizontal-alignment: center;
+                    }
+
+                    CheckBox {
+                        toggled => {
+                            root.can-search-videos = self.checked;
+                        }
+                    }
+                }
+
+                HorizontalBox {
+                    alignment: center;
+                    spacing: 25px;
+                    Text {
+                        text: "Compressed Files";
+                        font-size: 18px;
+                        horizontal-alignment: center;
+                    }
+
+                    CheckBox {
+                        toggled => {
+                            root.can-search-compressed-files = self.checked;
+                        }
+                    }
+                }
+            }
+
+            Row {
+                HorizontalBox {
+                    alignment: center;
+                    spacing: 25px;
+                    Text {
+                        text: "Sounds";
+                        font-size: 18px;
+                        horizontal-alignment: center;
+                    }
+
+                    CheckBox {
+                        toggled => {
+                            root.can-search-sounds = self.checked;
+                        }
+                    }
+                }
+            }
+        }
+
+        HorizontalBox {
+            alignment: center;
+            spacing: 25px;
+          // Confirem Changes
+          Button {
+                width: 150px;
+                primary: true;
+                text: "Search";
+                enabled: CanSearch();
+                clicked => {
+                    root.ButtonSearchClicked(root-path,output-path);
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        visible: root.show-wating-screen;
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            background: black;
+            opacity: 0.95;
+        }
+
+        Text {
+            font-size: 20px;
+            height: 100px;
+            width: 500px;
+            text: message;
+            horizontal-alignment: TextHorizontalAlignment.center;
+            vertical-alignment: TextVerticalAlignment.center;
+            wrap: TextWrap.word-wrap;
+        }
+
+        TouchArea {
+            width: parent.width;
+            height: parent.height;
+            enabled: root.show-wating-screen;
+        }
+
+        TouchArea {
+            width: parent.width;
+            height: parent.height;
+            enabled: can-exit-wating-screen;
+            clicked => {
+                ShowWatingScreen(false);
+                ExitWatingScreen();
+            }
+        }
+    }
+
+    ShowWatingScreen(show) => {
+        show-wating-screen = show;
+    }
+
+    UpdateWatingText(text) => {
+        message = text;
+    }
+
+    function CanSearch() -> bool {
+        return root-path != "" && output-path != "" && (can_search_videos || can_search_images || can-search-sounds || can_search_compressed_files);
+    }
+}
