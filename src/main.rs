@@ -180,14 +180,14 @@ fn open_file_explorer(path: &str) {
 
     #[cfg(target_os = "macos")]
     {
-        if Err(err) = Command::new("open").arg(path).spawn() {
+        if let Err(err) = Command::new("open").arg(path).spawn() {
             println!("Failed to open Finder: {}", err);
         }
     }
 
     #[cfg(target_os = "linux")]
     {
-        if Err(err) = Command::new("xdg-open").arg(path).spawn() {
+        if let Err(err) = Command::new("xdg-open").arg(path).spawn() {
             println!("Failed to open file manager: {err}");
         }
     }
